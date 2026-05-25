@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "workspaces": [
+        "packages/frontend",
+        "packages/backend",
+        "packages/shared"
+    ],
+    "devDependencies": {
+        "@types/bcrypt": "^6.0.0",
+        "tsx": "^4.21.0"
+    },
+    "dependencies": {
+        "@fastify/cors": "^11.1.0"
+    }
+}
