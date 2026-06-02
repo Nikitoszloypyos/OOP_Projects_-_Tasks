@@ -6,66 +6,9 @@
 
 В терминах DDD это можно воспринимать как **shared kernel**.
 
----
+## Что можно быть в shared
 
-## Нужно ли называть эту директорию shared
-
-Да, название `shared` здесь подходит.
-
-Оно показывает, что внутри лежат общие части backend-приложения.
-
-Альтернативные названия могли бы быть:
-
-- `core`
-- `common`
-- `kernel`
-- `shared-kernel`
-
-Но для текущего проекта `shared` проще и понятнее.
-
-Главное правило: `shared` не должен превращаться в папку для всего подряд.
-
----
-
-## Нормально ли, что shared содержит кусок Clean Architecture
-
-Да, это нормально.
-
-Внутри `shared` есть разделение:
-
-```text
-shared/
-  domain/
-  application/
-  infrastructure/
-  lib/
-```
-
-Это не отдельный бизнес-модуль, а общий инфраструктурно-архитектурный слой.
-
-Такое разделение нужно, чтобы даже общий код не смешивался в одну кучу.
-
-Например:
-
-- интерфейс `PasswordHasher` лежит в `application/ports`;
-- реализация `ScryptPasswordHasher` лежит в `infrastructure/security`;
-- общие ошибки лежат в `domain/errors`;
-- мелкие утилиты лежат в `lib`.
-
-То есть `shared` тоже соблюдает направление зависимостей:
-
-```text
-application -> domain
-infrastructure -> application/domain
-```
-
-Но бизнес-логики конкретных модулей здесь быть не должно.
-
----
-
-## Что можно класть в shared
-
-В `shared` можно класть только то, что реально нужно нескольким модулям.
+В `shared` можно быть только то, что реально нужно нескольким модулям.
 
 Примеры:
 
@@ -81,8 +24,6 @@ infrastructure -> application/domain
 ## Что нельзя класть в shared
 
 В `shared` нельзя класть бизнес-сущности конкретных модулей.
-
-Нельзя:
 
 ```text
 shared/domain/entities/User.ts
@@ -124,13 +65,6 @@ RegisterUserUseCase
 ```text
 shared/domain/errors/
 ```
-
-Примеры:
-
-- `ValidationError`
-- `NotFoundError`
-- `ForbiddenError`
-- `AuthError`
 
 Эти ошибки могут использоваться разными модулями.
 
@@ -226,69 +160,3 @@ shared/infrastructure/security/ScryptPasswordHasher.ts
 
 ---
 
-## Примеры правильного использования
-
-Хорошо:
-
-```text
-shared/application/ports/PasswordHasher.ts
-shared/infrastructure/security/ScryptPasswordHasher.ts
-```
-
-Потому что хеширование паролей может понадобиться users/auth, но сама реализация не является бизнес-сущностью пользователя.
-
-Хорошо:
-
-```text
-shared/infrastructure/prisma/prismaClient.ts
-```
-
-Потому что Prisma client нужен разным persistence-адаптерам.
-
-Хорошо:
-
-```text
-shared/domain/errors/NotFoundError.ts
-```
-
-Потому что ошибка "не найдено" может использоваться разными модулями.
-
----
-
-## Примеры неправильного использования
-
-Плохо:
-
-```text
-shared/domain/entities/Task.ts
-```
-
-Потому что `Task` — это сущность модуля `tasks`.
-
-Плохо:
-
-```text
-shared/application/use-cases/CreateProjectUseCase.ts
-```
-
-Потому что use-case создания проекта относится к модулю `projects`.
-
-Плохо:
-
-```text
-shared/lib/calculateTaskProgress.ts
-```
-
-Потому что прогресс задачи относится к доменной логике задач.
-
----
-
-## Главное правило
-
-`shared` — это не место для кода, который непонятно куда положить.
-
-`shared` — это место только для кода, который действительно является общим для нескольких модулей.
-
-Если есть сомнение, лучше сначала положить файл внутрь конкретного модуля.
-
-Перенести код в `shared` можно позже, когда станет понятно, что он реально нужен нескольким модулям.

@@ -232,21 +232,11 @@ index.ts
 infrastructure -> application -> domain
 ```
 
-Неправильно:
-
-```text
-domain -> infrastructure
-domain -> Prisma
-domain -> Fastify
-```
-
 Домен должен оставаться самым независимым слоем.
 
 ---
 
-## Как распределять работу
-
-Каждый человек может работать в своём модуле:
+## Каждый человек может работать в своём модуле:
 
 ```text
 modules/users/
