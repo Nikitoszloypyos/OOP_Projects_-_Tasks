@@ -1,19 +1,17 @@
 {
-  "name": "@trackerus/frontend",
+  "name": "@task-management/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "../../node_modules/.bin/vite",
-    "build": "../../node_modules/.bin/tsc -b && vite build",
-    "lint": "../../node_modules/.bin/eslint .",
-    "preview": "../../node_modules/.bin/vite preview"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@types/uuid": "^10.0.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "uuid": "^13.0.0"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

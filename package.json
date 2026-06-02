@@ -1,15 +1,10 @@
 {
-    "private": true,
-    "workspaces": [
-        "packages/frontend",
-        "packages/backend",
-        "packages/shared"
-    ],
-    "devDependencies": {
-        "@types/bcrypt": "^6.0.0",
-        "tsx": "^4.21.0"
-    },
-    "dependencies": {
-        "@fastify/cors": "^11.1.0"
-    }
+  "name": "task-management-system",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm run dev --prefix packages/backend",
+    "dev:frontend": "npm run dev --prefix packages/frontend",
+    "typecheck:backend": "npm run typecheck --prefix packages/backend",
+    "build:frontend": "npm run build --prefix packages/frontend"
+  }
 }

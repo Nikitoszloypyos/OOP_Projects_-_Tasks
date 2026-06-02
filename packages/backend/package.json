@@ -1,21 +1,28 @@
 {
-  "name": "@trackerus/backend",
+  "name": "@task-management/backend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "ts-node --esm src/index.ts"
+    "dev": "tsx src/index.ts",
+    "dev:all": "ENABLED_MODULES=all tsx src/index.ts",
+    "dev:users": "ENABLED_MODULES=users tsx src/index.ts",
+    "dev:projects": "ENABLED_MODULES=users,projects tsx src/index.ts",
+    "dev:tasks": "ENABLED_MODULES=users,projects,tasks tsx src/index.ts",
+    "dev:comments": "ENABLED_MODULES=users,projects,tasks,comments tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
-    "@fastify/cookie": "^11.0.2",
     "@prisma/client": "^6.19.0",
-    "fastify": "^5.0.0",
-    "prisma": "^6.19.0",
-    "sqlite3": "^5.1.7"
+    "dotenv": "^16.4.7",
+    "fastify": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "ts-node": "^10.9.2",
+    "prisma": "^6.19.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3"
   }
 }
