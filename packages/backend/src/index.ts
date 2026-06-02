@@ -1,18 +1,18 @@
-import { createAppContext } from './infrastructure/composition/appContext';
-import { createServer } from './infrastructure/HTTP/createServer';
+import { createApp } from './app/createApp';
+import { parseEnabledModules } from './app/registerModules';
 
 async function bootstrap() {
-      const ctx = createAppContext();
-      const app = createServer(ctx);
+      const enabledModules = parseEnabledModules(process.env.ENABLED_MODULES);
+      const app = await createApp({ enabledModules });
 
-      const port = Number(process.env.PORT) || 3000;
+      const port = Number(process.env.PORT) || 8080;
       const host = process.env.HOST || '0.0.0.0';
 
       try {
             await app.listen({ port, host });
             app.log.info(`Server listening on http://${host}:${port}`);
-      } catch (err) {
-            app.log.error(err);
+      } catch (error) {
+            app.log.error(error);
             process.exit(1);
       }
 }
