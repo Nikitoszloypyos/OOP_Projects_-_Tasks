@@ -45,3 +45,22 @@ model TimeEntry {
   @@index([ownerId, date], name: "idx_timeentry_owner_date")
   @@index([habitId, date], name: "idx_timeentry_habit_date")
 }
+
+model Task {
+  id          String    @id
+  projectId   String
+  title       String
+  description String    @default("")
+  status      String
+  priority    String
+  creatorId   String
+  assigneeId  String?
+  createdAt   DateTime
+  updatedAt   DateTime
+  isArchived  Boolean   @default(false)
+  archivedAt  DateTime?
+  archivedBy  String?
+
+  @@index([projectId, isArchived, status], name: "idx_task_project_archived_status")
+  @@index([assigneeId, isArchived], name: "idx_task_assignee_archived")
+}

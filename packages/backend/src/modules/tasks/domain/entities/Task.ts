@@ -25,8 +25,8 @@ export interface RehydrateTaskParams {
       projectId: string;
       title: string;
       description?: string | null;
-      status: TaskStatusValue;
-      priority: TaskPriorityValue;
+      status: string;
+      priority: string;
       creatorId: string;
       assigneeId: string | null;
       createdAt: Date;
