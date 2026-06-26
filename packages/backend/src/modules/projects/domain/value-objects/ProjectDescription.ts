@@ -1,27 +1,23 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-const MAX_PROJECT_DESCRIPTION_LENGTH = 2_000;
+const MAX_PROJECT_DESCRIPTION_LENGTH = 2000;
 
 export class ProjectDescription {
-      private constructor(private readonly value: string) {}
+      private constructor(private readonly value: string | null) {}
 
       static create(value?: string | null): ProjectDescription {
-            const description = value?.trim() ?? '';
+            const normalized = value?.trim() ?? null;
 
-            if (description.length > MAX_PROJECT_DESCRIPTION_LENGTH) {
+            if (normalized && normalized.length > MAX_PROJECT_DESCRIPTION_LENGTH) {
                   throw new ValidationError(
-                        `Project description cannot be longer than ${MAX_PROJECT_DESCRIPTION_LENGTH} characters`
+                        `Project description must be at most ${MAX_PROJECT_DESCRIPTION_LENGTH} characters long`
                   );
             }
 
-            return new ProjectDescription(description);
+            return new ProjectDescription(normalized || null);
       }
 
-      getValue(): string {
+      getValue(): string | null {
             return this.value;
-      }
-
-      isEmpty(): boolean {
-            return this.value.length === 0;
       }
 }

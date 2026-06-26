@@ -1,22 +1,22 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class UserEmail {
       private constructor(private readonly value: string) {}
 
       static create(value: string): UserEmail {
-            const email = value.trim().toLowerCase();
+            const normalized = value.trim().toLowerCase();
 
-            if (email.length === 0) {
-                  throw new ValidationError('User email cannot be empty');
+            if (!normalized) {
+                  throw new ValidationError('Email is required');
             }
 
-            if (!EMAIL_PATTERN.test(email)) {
-                  throw new ValidationError('User email has invalid format');
+            if (!EMAIL_REGEX.test(normalized)) {
+                  throw new ValidationError('Email format is invalid');
             }
 
-            return new UserEmail(email);
+            return new UserEmail(normalized);
       }
 
       getValue(): string {

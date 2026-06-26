@@ -1,15 +1,14 @@
-import { ValidationError } from '../../../../shared/domain/errors';
-import { ProjectRole, ProjectRoleValue } from '../value-objects';
+import { ProjectRole } from '../value-objects/ProjectRole';
 
-export interface CreateProjectMemberParams {
+export interface CreateProjectMemberProps {
       id: string;
       projectId: string;
       userId: string;
-      role?: ProjectRoleValue;
+      role?: 'owner' | 'member';
       joinedAt: Date;
 }
 
-export interface RehydrateProjectMemberParams {
+export interface RehydrateProjectMemberProps {
       id: string;
       projectId: string;
       userId: string;
@@ -21,70 +20,58 @@ export interface ProjectMemberSnapshot {
       id: string;
       projectId: string;
       userId: string;
-      role: ProjectRoleValue;
-      joinedAt: Date;
-}
-
-interface ProjectMemberProps {
-      id: string;
-      projectId: string;
-      userId: string;
-      role: ProjectRole;
+      role: 'owner' | 'member';
       joinedAt: Date;
 }
 
 export class ProjectMember {
-      private constructor(private readonly props: ProjectMemberProps) {
-            this.assertRequiredId(props.id, 'Project member id');
-            this.assertRequiredId(props.projectId, 'Project id');
-            this.assertRequiredId(props.userId, 'User id');
+      private constructor(
+            private readonly id: string,
+            private readonly projectId: string,
+            private readonly userId: string,
+            private role: ProjectRole,
+            private readonly joinedAt: Date
+      ) {}
+
+      static create(props: CreateProjectMemberProps): ProjectMember {
+            return new ProjectMember(
+                  props.id,
+                  props.projectId,
+                  props.userId,
+                  props.role ? ProjectRole.create(props.role) : ProjectRole.member(),
+                  props.joinedAt
+            );
       }
 
-      static create(params: CreateProjectMemberParams): ProjectMember {
-            return new ProjectMember({
-                  id: params.id,
-                  projectId: params.projectId,
-                  userId: params.userId,
-                  role: params.role ? ProjectRole.create(params.role) : ProjectRole.member(),
-                  joinedAt: cloneDate(params.joinedAt)
-            });
+      static rehydrate(props: RehydrateProjectMemberProps): ProjectMember {
+            return new ProjectMember(
+                  props.id,
+                  props.projectId,
+                  props.userId,
+                  ProjectRole.create(props.role),
+                  props.joinedAt
+            );
       }
 
-      static rehydrate(params: RehydrateProjectMemberParams): ProjectMember {
-            return new ProjectMember({
-                  id: params.id,
-                  projectId: params.projectId,
-                  userId: params.userId,
-                  role: ProjectRole.create(params.role),
-                  joinedAt: cloneDate(params.joinedAt)
-            });
+      getProjectId(): string {
+            return this.projectId;
       }
 
-      changeRole(role: ProjectRoleValue): void {
-            this.props.role = ProjectRole.create(role);
+      getUserId(): string {
+            return this.userId;
       }
 
       isOwner(): boolean {
-            return this.props.role.equals(ProjectRole.owner());
+            return this.role.equals(ProjectRole.owner());
       }
 
       toSnapshot(): ProjectMemberSnapshot {
             return {
-                  id: this.props.id,
-                  projectId: this.props.projectId,
-                  userId: this.props.userId,
-                  role: this.props.role.getValue(),
-                  joinedAt: cloneDate(this.props.joinedAt)
+                  id: this.id,
+                  projectId: this.projectId,
+                  userId: this.userId,
+                  role: this.role.getValue(),
+                  joinedAt: this.joinedAt
             };
       }
-
-      private assertRequiredId(value: string, label: string): void {
-            if (value.trim().length === 0) {
-                  throw new ValidationError(`${label} cannot be empty`);
-            }
-      }
-}
-
-function cloneDate(date: Date): Date {
-      return new Date(date);
 }

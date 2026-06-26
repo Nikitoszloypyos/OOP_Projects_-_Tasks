@@ -10,57 +10,65 @@ generator client {
 model User {
   id           String   @id
   email        String   @unique
+  name         String
   passwordHash String
   createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  ownedProjects Project[]       @relation("ProjectOwner")
+  memberships   ProjectMember[]
 }
 
-model Visitor {
-  id          String   @id
-  createdAt   DateTime @default(now())
-  lastVisitAt DateTime
-  visitCount  Int
+model Project {
+  id          String          @id
+  ownerId     String
+  name        String
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime
+  isArchived  Boolean         @default(false)
+  archivedAt  DateTime?
+  archivedBy  String?
+  owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members     ProjectMember[]
+  tasks       Task[]
 }
 
-model Habit {
-  id         String   @id
-  ownerId    String
-  name       String
-  color      String?
-  isArchived Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  orderIndex Int?
+model ProjectMember {
+  id        String   @id
+  projectId String
+  userId    String
+  role      String
+  joinedAt  DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([ownerId, isArchived], name: "idx_habit_owner_archived")
-}
-
-model TimeEntry {
-  id              String   @id
-  ownerId         String
-  habitId         String
-  date            String   // YYYY-MM-DD
-  durationMinutes Int
-  source          String?
-  createdAt       DateTime @default(now())
-
-  @@index([ownerId, date], name: "idx_timeentry_owner_date")
-  @@index([habitId, date], name: "idx_timeentry_habit_date")
+  @@unique([projectId, userId])
 }
 
 model Task {
-  id          String    @id
+  id          String   @id
   projectId   String
-  title       String
-  description String    @default("")
-  status      String
-  priority    String
   creatorId   String
   assigneeId  String?
-  createdAt   DateTime
+  title       String
+  description String?
+  status      String
+  priority    String
+  createdAt   DateTime @default(now())
   updatedAt   DateTime
-  isArchived  Boolean   @default(false)
+  isArchived  Boolean  @default(false)
   archivedAt  DateTime?
   archivedBy  String?
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+}
 
-  @@index([projectId, isArchived, status], name: "idx_task_project_archived_status")
-  @@index([assigneeId, isArchived], name: "idx_task_assignee_archived")
+model Comment {
+  id        String   @id
+  taskId     String
+  authorId   String
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }

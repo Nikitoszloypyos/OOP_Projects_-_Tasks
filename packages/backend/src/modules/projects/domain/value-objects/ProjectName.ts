@@ -6,19 +6,19 @@ export class ProjectName {
       private constructor(private readonly value: string) {}
 
       static create(value: string): ProjectName {
-            const name = value.trim();
+            const normalized = value.trim();
 
-            if (name.length === 0) {
-                  throw new ValidationError('Project name cannot be empty');
+            if (!normalized) {
+                  throw new ValidationError('Project name is required');
             }
 
-            if (name.length > MAX_PROJECT_NAME_LENGTH) {
+            if (normalized.length > MAX_PROJECT_NAME_LENGTH) {
                   throw new ValidationError(
-                        `Project name cannot be longer than ${MAX_PROJECT_NAME_LENGTH} characters`
+                        `Project name must be at most ${MAX_PROJECT_NAME_LENGTH} characters long`
                   );
             }
 
-            return new ProjectName(name);
+            return new ProjectName(normalized);
       }
 
       getValue(): string {

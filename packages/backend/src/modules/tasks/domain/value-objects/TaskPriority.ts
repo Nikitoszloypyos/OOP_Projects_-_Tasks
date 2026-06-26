@@ -1,30 +1,20 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-export const TASK_PRIORITIES = ['low', 'medium', 'high'] as const;
-
-export type TaskPriorityValue = (typeof TASK_PRIORITIES)[number];
+export type TaskPriorityValue = 'low' | 'medium' | 'high';
 
 export class TaskPriority {
       private constructor(private readonly value: TaskPriorityValue) {}
 
       static create(value: string): TaskPriority {
-            if (!TASK_PRIORITIES.includes(value as TaskPriorityValue)) {
-                  throw new ValidationError(`Unknown task priority "${value}"`);
+            if (value !== 'low' && value !== 'medium' && value !== 'high') {
+                  throw new ValidationError('Task priority is invalid');
             }
 
-            return new TaskPriority(value as TaskPriorityValue);
-      }
-
-      static low(): TaskPriority {
-            return new TaskPriority('low');
+            return new TaskPriority(value);
       }
 
       static medium(): TaskPriority {
             return new TaskPriority('medium');
-      }
-
-      static high(): TaskPriority {
-            return new TaskPriority('high');
       }
 
       getValue(): TaskPriorityValue {

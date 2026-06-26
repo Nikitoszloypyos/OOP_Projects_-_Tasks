@@ -33,20 +33,35 @@ export async function registerModules(
       enabledModules: AppModuleName[] = [...APP_MODULES]
 ): Promise<void> {
       const enabled = new Set(enabledModules);
+      let usersApi;
+      let projectsApi;
+      let tasksApi;
 
       if (enabled.has('users')) {
-            await registerUsersModule(app, deps);
+            usersApi = await registerUsersModule(app, deps);
       }
 
       if (enabled.has('projects')) {
-            await registerProjectsModule(app, deps);
+            if (!usersApi) {
+                  throw new Error('Projects module requires users module to be enabled');
+            }
+
+            projectsApi = await registerProjectsModule(app, deps, usersApi);
       }
 
       if (enabled.has('tasks')) {
-            await registerTasksModule(app, deps);
+            if (!usersApi || !projectsApi) {
+                  throw new Error('Tasks module requires users and projects modules to be enabled');
+            }
+
+            tasksApi = await registerTasksModule(app, deps, usersApi, projectsApi);
       }
 
       if (enabled.has('comments')) {
-            await registerCommentsModule(app, deps);
+            if (!tasksApi) {
+                  throw new Error('Comments module requires tasks module to be enabled');
+            }
+
+            await registerCommentsModule(app, deps, tasksApi);
       }
 }

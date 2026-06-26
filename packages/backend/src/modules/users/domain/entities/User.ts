@@ -1,7 +1,7 @@
-import { ValidationError } from '../../../../shared/domain/errors';
-import { UserEmail, UserName } from '../value-objects';
+import { UserEmail } from '../value-objects/UserEmail';
+import { UserName } from '../value-objects/UserName';
 
-export interface CreateUserParams {
+export interface CreateUserProps {
       id: string;
       email: string;
       name: string;
@@ -9,7 +9,7 @@ export interface CreateUserParams {
       createdAt: Date;
 }
 
-export interface RehydrateUserParams {
+export interface RehydrateUserProps {
       id: string;
       email: string;
       name: string;
@@ -27,87 +27,85 @@ export interface UserSnapshot {
       updatedAt: Date;
 }
 
-interface UserProps {
-      id: string;
-      email: UserEmail;
-      name: UserName;
-      passwordHash: string;
-      createdAt: Date;
-      updatedAt: Date;
-}
-
 export class User {
-      private constructor(private readonly props: UserProps) {
-            this.assertRequiredId(props.id, 'User id');
-            this.assertPasswordHash(props.passwordHash);
+      private constructor(
+            private readonly id: string,
+            private email: UserEmail,
+            private name: UserName,
+            private passwordHash: string,
+            private readonly createdAt: Date,
+            private updatedAt: Date
+      ) {}
+
+      static create(props: CreateUserProps): User {
+            return new User(
+                  props.id,
+                  UserEmail.create(props.email),
+                  UserName.create(props.name),
+                  props.passwordHash,
+                  props.createdAt,
+                  props.createdAt
+            );
       }
 
-      static create(params: CreateUserParams): User {
-            return new User({
-                  id: params.id,
-                  email: UserEmail.create(params.email),
-                  name: UserName.create(params.name),
-                  passwordHash: params.passwordHash,
-                  createdAt: cloneDate(params.createdAt),
-                  updatedAt: cloneDate(params.createdAt)
-            });
+      static rehydrate(props: RehydrateUserProps): User {
+            return new User(
+                  props.id,
+                  UserEmail.create(props.email),
+                  UserName.create(props.name),
+                  props.passwordHash,
+                  props.createdAt,
+                  props.updatedAt
+            );
       }
 
-      static rehydrate(params: RehydrateUserParams): User {
-            return new User({
-                  id: params.id,
-                  email: UserEmail.create(params.email),
-                  name: UserName.create(params.name),
-                  passwordHash: params.passwordHash,
-                  createdAt: cloneDate(params.createdAt),
-                  updatedAt: cloneDate(params.updatedAt)
-            });
+      getId(): string {
+            return this.id;
+      }
+
+      getEmail(): string {
+            return this.email.getValue();
+      }
+
+      getName(): string {
+            return this.name.getValue();
+      }
+
+      getPasswordHash(): string {
+            return this.passwordHash;
+      }
+
+      getCreatedAt(): Date {
+            return this.createdAt;
+      }
+
+      getUpdatedAt(): Date {
+            return this.updatedAt;
       }
 
       rename(name: string, updatedAt: Date): void {
-            this.props.name = UserName.create(name);
-            this.touch(updatedAt);
+            this.name = UserName.create(name);
+            this.updatedAt = updatedAt;
       }
 
       changeEmail(email: string, updatedAt: Date): void {
-            this.props.email = UserEmail.create(email);
-            this.touch(updatedAt);
+            this.email = UserEmail.create(email);
+            this.updatedAt = updatedAt;
       }
 
       changePasswordHash(passwordHash: string, updatedAt: Date): void {
-            this.assertPasswordHash(passwordHash);
-            this.props.passwordHash = passwordHash;
-            this.touch(updatedAt);
+            this.passwordHash = passwordHash;
+            this.updatedAt = updatedAt;
       }
 
       toSnapshot(): UserSnapshot {
             return {
-                  id: this.props.id,
-                  email: this.props.email.getValue(),
-                  name: this.props.name.getValue(),
-                  passwordHash: this.props.passwordHash,
-                  createdAt: cloneDate(this.props.createdAt),
-                  updatedAt: cloneDate(this.props.updatedAt)
+                  id: this.id,
+                  email: this.email.getValue(),
+                  name: this.name.getValue(),
+                  passwordHash: this.passwordHash,
+                  createdAt: this.createdAt,
+                  updatedAt: this.updatedAt
             };
       }
-
-      private touch(updatedAt: Date): void {
-            this.props.updatedAt = cloneDate(updatedAt);
-      }
-
-      private assertRequiredId(value: string, label: string): void {
-            if (value.trim().length === 0) {
-                  throw new ValidationError(`${label} cannot be empty`);
-            }
-      }
-
-      private assertPasswordHash(value: string): void {
-            if (value.trim().length === 0) {
-                  throw new ValidationError('User password hash cannot be empty');
-            }
-      }
-}
-
-function cloneDate(date: Date): Date {
-      return new Date(date);
 }

@@ -6,19 +6,19 @@ export class UserName {
       private constructor(private readonly value: string) {}
 
       static create(value: string): UserName {
-            const name = value.trim();
+            const normalized = value.trim();
 
-            if (name.length === 0) {
-                  throw new ValidationError('User name cannot be empty');
+            if (!normalized) {
+                  throw new ValidationError('User name is required');
             }
 
-            if (name.length > MAX_USER_NAME_LENGTH) {
+            if (normalized.length > MAX_USER_NAME_LENGTH) {
                   throw new ValidationError(
-                        `User name cannot be longer than ${MAX_USER_NAME_LENGTH} characters`
+                        `User name must be at most ${MAX_USER_NAME_LENGTH} characters long`
                   );
             }
 
-            return new UserName(name);
+            return new UserName(normalized);
       }
 
       getValue(): string {

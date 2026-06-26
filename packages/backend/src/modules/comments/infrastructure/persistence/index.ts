@@ -1,0 +1,1 @@
+export { PrismaCommentRepository } from './PrismaCommentRepository';

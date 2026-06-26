@@ -1,24 +1,24 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-const MAX_TASK_TITLE_LENGTH = 120;
+const MAX_TASK_TITLE_LENGTH = 160;
 
 export class TaskTitle {
       private constructor(private readonly value: string) {}
 
       static create(value: string): TaskTitle {
-            const title = value.trim();
+            const normalized = value.trim();
 
-            if (title.length === 0) {
-                  throw new ValidationError('Task title cannot be empty');
+            if (!normalized) {
+                  throw new ValidationError('Task title is required');
             }
 
-            if (title.length > MAX_TASK_TITLE_LENGTH) {
+            if (normalized.length > MAX_TASK_TITLE_LENGTH) {
                   throw new ValidationError(
-                        `Task title cannot be longer than ${MAX_TASK_TITLE_LENGTH} characters`
+                        `Task title must be at most ${MAX_TASK_TITLE_LENGTH} characters long`
                   );
             }
 
-            return new TaskTitle(title);
+            return new TaskTitle(normalized);
       }
 
       getValue(): string {

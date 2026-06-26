@@ -1,8 +1,8 @@
-import { ValidationError } from '../../../../shared/domain/errors';
-import { ArchivedProjectError } from '../errors';
-import { ProjectDescription, ProjectName } from '../value-objects';
+import { ArchivedProjectError } from '../errors/ArchivedProjectError';
+import { ProjectDescription } from '../value-objects/ProjectDescription';
+import { ProjectName } from '../value-objects/ProjectName';
 
-export interface CreateProjectParams {
+export interface CreateProjectProps {
       id: string;
       ownerId: string;
       name: string;
@@ -10,11 +10,11 @@ export interface CreateProjectParams {
       createdAt: Date;
 }
 
-export interface RehydrateProjectParams {
+export interface RehydrateProjectProps {
       id: string;
       ownerId: string;
       name: string;
-      description?: string | null;
+      description: string | null;
       createdAt: Date;
       updatedAt: Date;
       isArchived: boolean;
@@ -26,19 +26,7 @@ export interface ProjectSnapshot {
       id: string;
       ownerId: string;
       name: string;
-      description: string;
-      createdAt: Date;
-      updatedAt: Date;
-      isArchived: boolean;
-      archivedAt: Date | null;
-      archivedBy: string | null;
-}
-
-interface ProjectProps {
-      id: string;
-      ownerId: string;
-      name: ProjectName;
-      description: ProjectDescription;
+      description: string | null;
       createdAt: Date;
       updatedAt: Date;
       isArchived: boolean;
@@ -47,99 +35,91 @@ interface ProjectProps {
 }
 
 export class Project {
-      private constructor(private readonly props: ProjectProps) {
-            this.assertRequiredId(props.id, 'Project id');
-            this.assertRequiredId(props.ownerId, 'Project owner id');
+      private constructor(
+            private readonly id: string,
+            private readonly ownerId: string,
+            private name: ProjectName,
+            private description: ProjectDescription,
+            private readonly createdAt: Date,
+            private updatedAt: Date,
+            private isArchived: boolean,
+            private archivedAt: Date | null,
+            private archivedBy: string | null
+      ) {}
 
-            if (props.archivedBy !== null) {
-                  this.assertRequiredId(props.archivedBy, 'Archive actor id');
-            }
+      static create(props: CreateProjectProps): Project {
+            return new Project(
+                  props.id,
+                  props.ownerId,
+                  ProjectName.create(props.name),
+                  ProjectDescription.create(props.description),
+                  props.createdAt,
+                  props.createdAt,
+                  false,
+                  null,
+                  null
+            );
       }
 
-      static create(params: CreateProjectParams): Project {
-            return new Project({
-                  id: params.id,
-                  ownerId: params.ownerId,
-                  name: ProjectName.create(params.name),
-                  description: ProjectDescription.create(params.description),
-                  createdAt: cloneDate(params.createdAt),
-                  updatedAt: cloneDate(params.createdAt),
-                  isArchived: false,
-                  archivedAt: null,
-                  archivedBy: null
-            });
+      static rehydrate(props: RehydrateProjectProps): Project {
+            return new Project(
+                  props.id,
+                  props.ownerId,
+                  ProjectName.create(props.name),
+                  ProjectDescription.create(props.description),
+                  props.createdAt,
+                  props.updatedAt,
+                  props.isArchived,
+                  props.archivedAt,
+                  props.archivedBy
+            );
       }
 
-      static rehydrate(params: RehydrateProjectParams): Project {
-            return new Project({
-                  id: params.id,
-                  ownerId: params.ownerId,
-                  name: ProjectName.create(params.name),
-                  description: ProjectDescription.create(params.description),
-                  createdAt: cloneDate(params.createdAt),
-                  updatedAt: cloneDate(params.updatedAt),
-                  isArchived: params.isArchived,
-                  archivedAt: params.archivedAt ? cloneDate(params.archivedAt) : null,
-                  archivedBy: params.archivedBy
-            });
+      getId(): string {
+            return this.id;
+      }
+
+      getOwnerId(): string {
+            return this.ownerId;
       }
 
       rename(name: string, updatedAt: Date): void {
-            this.assertActive();
-            this.props.name = ProjectName.create(name);
-            this.touch(updatedAt);
+            this.ensureNotArchived();
+            this.name = ProjectName.create(name);
+            this.updatedAt = updatedAt;
       }
 
       updateDescription(description: string | null | undefined, updatedAt: Date): void {
-            this.assertActive();
-            this.props.description = ProjectDescription.create(description);
-            this.touch(updatedAt);
+            this.ensureNotArchived();
+            this.description = ProjectDescription.create(description);
+            this.updatedAt = updatedAt;
       }
 
       archive(actorId: string, archivedAt: Date): void {
-            this.assertRequiredId(actorId, 'Archive actor id');
-
-            if (this.props.isArchived) {
-                  throw new ArchivedProjectError('Project is already archived');
-            }
-
-            this.props.isArchived = true;
-            this.props.archivedAt = cloneDate(archivedAt);
-            this.props.archivedBy = actorId;
-            this.touch(archivedAt);
+            this.ensureNotArchived();
+            this.isArchived = true;
+            this.archivedAt = archivedAt;
+            this.archivedBy = actorId;
+            this.updatedAt = archivedAt;
       }
 
       toSnapshot(): ProjectSnapshot {
             return {
-                  id: this.props.id,
-                  ownerId: this.props.ownerId,
-                  name: this.props.name.getValue(),
-                  description: this.props.description.getValue(),
-                  createdAt: cloneDate(this.props.createdAt),
-                  updatedAt: cloneDate(this.props.updatedAt),
-                  isArchived: this.props.isArchived,
-                  archivedAt: this.props.archivedAt ? cloneDate(this.props.archivedAt) : null,
-                  archivedBy: this.props.archivedBy
+                  id: this.id,
+                  ownerId: this.ownerId,
+                  name: this.name.getValue(),
+                  description: this.description.getValue(),
+                  createdAt: this.createdAt,
+                  updatedAt: this.updatedAt,
+                  isArchived: this.isArchived,
+                  archivedAt: this.archivedAt,
+                  archivedBy: this.archivedBy
             };
       }
 
-      private touch(updatedAt: Date): void {
-            this.props.updatedAt = cloneDate(updatedAt);
-      }
-
-      private assertActive(): void {
-            if (this.props.isArchived) {
+      private ensureNotArchived(): void {
+            if (this.isArchived) {
                   throw new ArchivedProjectError();
             }
       }
-
-      private assertRequiredId(value: string, label: string): void {
-            if (value.trim().length === 0) {
-                  throw new ValidationError(`${label} cannot be empty`);
-            }
-      }
-}
-
-function cloneDate(date: Date): Date {
-      return new Date(date);
 }

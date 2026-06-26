@@ -1,18 +1,18 @@
 import type { Task as PrismaTask } from '@prisma/client';
 
-import { Task } from '../../domain';
+import { Task } from '../../domain/entities';
 
 export class TaskMapper {
       static toDomain(record: PrismaTask): Task {
             return Task.rehydrate({
                   id: record.id,
                   projectId: record.projectId,
+                  creatorId: record.creatorId,
+                  assigneeId: record.assigneeId,
                   title: record.title,
                   description: record.description,
                   status: record.status,
                   priority: record.priority,
-                  creatorId: record.creatorId,
-                  assigneeId: record.assigneeId,
                   createdAt: record.createdAt,
                   updatedAt: record.updatedAt,
                   isArchived: record.isArchived,
@@ -21,7 +21,7 @@ export class TaskMapper {
             });
       }
 
-      static toPersistence(task: Task): PrismaTask {
+      static toPersistence(task: Task) {
             return task.toSnapshot();
       }
 }

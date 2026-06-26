@@ -1,11 +1,10 @@
 import type { TaskDTO } from './TaskDTO';
 
-export interface ListProjectTasksInputDTO {
-      actorId: string;
+export interface ListProjectTasksRequestDTO {
       projectId: string;
-      includeArchived?: boolean;
+      actorId: string;
 }
 
-export interface ListProjectTasksOutputDTO {
+export interface ListProjectTasksResponseDTO {
       tasks: TaskDTO[];
 }

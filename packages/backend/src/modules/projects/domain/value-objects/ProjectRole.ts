@@ -1,18 +1,16 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-export const PROJECT_ROLES = ['owner', 'member'] as const;
-
-export type ProjectRoleValue = (typeof PROJECT_ROLES)[number];
+export type ProjectRoleValue = 'owner' | 'member';
 
 export class ProjectRole {
       private constructor(private readonly value: ProjectRoleValue) {}
 
       static create(value: string): ProjectRole {
-            if (!PROJECT_ROLES.includes(value as ProjectRoleValue)) {
-                  throw new ValidationError(`Unknown project role "${value}"`);
+            if (value !== 'owner' && value !== 'member') {
+                  throw new ValidationError('Project role is invalid');
             }
 
-            return new ProjectRole(value as ProjectRoleValue);
+            return new ProjectRole(value);
       }
 
       static owner(): ProjectRole {
@@ -23,11 +21,11 @@ export class ProjectRole {
             return new ProjectRole('member');
       }
 
-      equals(role: ProjectRole): boolean {
-            return this.value === role.value;
-      }
-
       getValue(): ProjectRoleValue {
             return this.value;
+      }
+
+      equals(other: ProjectRole): boolean {
+            return this.value === other.value;
       }
 }

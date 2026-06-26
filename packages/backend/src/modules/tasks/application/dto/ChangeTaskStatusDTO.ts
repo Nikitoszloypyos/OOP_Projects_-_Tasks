@@ -1,12 +1,11 @@
-import type { TaskStatusValue } from '../../domain';
 import type { TaskDTO } from './TaskDTO';
 
-export interface ChangeTaskStatusInputDTO {
-      actorId: string;
+export interface ChangeTaskStatusRequestDTO {
       taskId: string;
-      status: TaskStatusValue;
+      actorId: string;
+      status: string;
 }
 
-export interface ChangeTaskStatusOutputDTO {
+export interface ChangeTaskStatusResponseDTO {
       task: TaskDTO;
 }

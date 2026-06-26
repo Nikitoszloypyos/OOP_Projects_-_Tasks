@@ -1,27 +1,23 @@
 import { ValidationError } from '../../../../shared/domain/errors';
 
-const MAX_TASK_DESCRIPTION_LENGTH = 2_000;
+const MAX_TASK_DESCRIPTION_LENGTH = 3000;
 
 export class TaskDescription {
-      private constructor(private readonly value: string) {}
+      private constructor(private readonly value: string | null) {}
 
       static create(value?: string | null): TaskDescription {
-            const description = value?.trim() ?? '';
+            const normalized = value?.trim() ?? null;
 
-            if (description.length > MAX_TASK_DESCRIPTION_LENGTH) {
+            if (normalized && normalized.length > MAX_TASK_DESCRIPTION_LENGTH) {
                   throw new ValidationError(
-                        `Task description cannot be longer than ${MAX_TASK_DESCRIPTION_LENGTH} characters`
+                        `Task description must be at most ${MAX_TASK_DESCRIPTION_LENGTH} characters long`
                   );
             }
 
-            return new TaskDescription(description);
+            return new TaskDescription(normalized || null);
       }
 
-      getValue(): string {
+      getValue(): string | null {
             return this.value;
-      }
-
-      isEmpty(): boolean {
-            return this.value.length === 0;
       }
 }

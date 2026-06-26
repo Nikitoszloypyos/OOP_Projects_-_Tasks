@@ -1,11 +1,11 @@
 import type { CommentDTO } from './CommentDTO';
 
-export interface AddCommentInputDTO {
+export interface AddCommentRequestDTO {
       actorId: string;
       taskId: string;
       text: string;
 }
 
-export interface AddCommentOutputDTO {
+export interface AddCommentResponseDTO {
       comment: CommentDTO;
 }

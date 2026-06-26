@@ -1,11 +1,10 @@
 import type { CommentDTO } from './CommentDTO';
 
-export interface ListTaskCommentsInputDTO {
-      actorId: string;
+export interface ListTaskCommentsRequestDTO {
       taskId: string;
-      includeDeleted?: boolean;
+      actorId: string;
 }
 
-export interface ListTaskCommentsOutputDTO {
+export interface ListTaskCommentsResponseDTO {
       comments: CommentDTO[];
 }
